@@ -20,20 +20,20 @@ jobs:
       - name: build controller binary
         run: >
           CGO_ENABLED=0 GOOS=linux go build -o controller/controller
-          -ldflags="-X 'go.universe.tf/metallb/internal/version.version=${{github.ref_name}}"
-          "-X go.universe.tf/metallb/internal/version.gitCommit=${{github.sha}}"'
+          -ldflags="-X 'go.universe.tf/metallb/internal/version.version=${{github.ref_name}}'
+          -X 'go.universe.tf/metallb/internal/version.gitCommit=${{github.sha}}'"
           ./controller
       - name: build speaker binary
         run: >
           CGO_ENABLED=0 GOOS=linux go build -o speaker/speaker
-          -ldflags="-X 'go.universe.tf/metallb/internal/version.version=${{github.ref_name}}"
-          "-X go.universe.tf/metallb/internal/version.gitCommit=${{github.sha}}"'
+          -ldflags="-X 'go.universe.tf/metallb/internal/version.version=${{github.ref_name}}'
+          -X 'go.universe.tf/metallb/internal/version.gitCommit=${{github.sha}}'"
           ./speaker
       - name: build frr-metrics binary
         run: >
           CGO_ENABLED=0 GOOS=linux go build -o speaker/frr-metrcics
-          -ldflags="-X 'go.universe.tf/metallb/internal/version.version=${{github.ref_name}}"
-          "-X go.universe.tf/metallb/internal/version.gitCommit=${{github.sha}}"'
+          -ldflags="-X 'go.universe.tf/metallb/internal/version.version=${{github.ref_name}}'
+          -X 'go.universe.tf/metallb/internal/version.gitCommit=${{github.sha}}'"
           ./frr-metrics/exporter.go
       - name: copy frr-reloader.sh script
         run: cp frr-reloader/frr-reloader.sh /speaker
