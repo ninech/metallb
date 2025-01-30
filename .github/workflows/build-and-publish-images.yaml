@@ -36,7 +36,7 @@ jobs:
           -X 'go.universe.tf/metallb/internal/version.gitCommit=${{github.sha}}'"
           ./frr-metrics/exporter.go
       - name: copy frr-reloader.sh script
-        run: cp frr-reloader/frr-reloader.sh /speaker
+        run: cp frr-reloader/frr-reloader.sh ./speaker/frr-reloader.sh
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
       - name: Login to GitHub Container Registry
