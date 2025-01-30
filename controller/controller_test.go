@@ -16,6 +16,7 @@ import (
 	"github.com/google/go-cmp/cmp"
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/utils/ptr"
 )
 
 func diffService(a, b *v1.Service) string {
@@ -175,6 +176,17 @@ func TestControllerMutation(t *testing.T) {
 		},
 
 		{
+			desc: "simple LoadBalancer with LoadBalancerClass set",
+			in: &v1.Service{
+				Spec: v1.ServiceSpec{
+					Type:              "LoadBalancer",
+					LoadBalancerClass: ptr.To("test"),
+					ClusterIPs:        []string{"1.2.3.4"},
+				},
+			},
+		},
+
+		{
 			desc: "simple LoadBalancer",
 			in: &v1.Service{
 				Spec: v1.ServiceSpec{
@@ -186,6 +198,25 @@ func TestControllerMutation(t *testing.T) {
 				Spec: v1.ServiceSpec{
 					ClusterIPs: []string{"1.2.3.4"},
 					Type:       "LoadBalancer",
+				},
+				Status: statusAssigned([]string{"1.2.3.0"}),
+			},
+		},
+
+		{
+			desc: "simple LoadBalancer with empty LoadBalancerClass set",
+			in: &v1.Service{
+				Spec: v1.ServiceSpec{
+					Type:              "LoadBalancer",
+					LoadBalancerClass: ptr.To(""),
+					ClusterIPs:        []string{"1.2.3.4"},
+				},
+			},
+			want: &v1.Service{
+				Spec: v1.ServiceSpec{
+					ClusterIPs:        []string{"1.2.3.4"},
+					LoadBalancerClass: ptr.To(""),
+					Type:              "LoadBalancer",
 				},
 				Status: statusAssigned([]string{"1.2.3.0"}),
 			},

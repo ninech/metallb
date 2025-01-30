@@ -37,10 +37,11 @@ const (
 func (c *controller) convergeBalancer(l log.Logger, key string, svc *v1.Service) bool {
 	lbIPs := []net.IP{}
 	var err error
-	// Not a LoadBalancer, early exit. It might have been a balancer
-	// in the past, so we still need to clear LB state.
-	if svc.Spec.Type != "LoadBalancer" {
-		level.Debug(l).Log("event", "clearAssignment", "reason", "notLoadBalancer", "msg", "not a LoadBalancer")
+	// Not a LoadBalancer or has a loadbalancerClass set, early exit. It
+	// might have been a balancer in the past, so we still need to clear LB
+	// state.
+	if svc.Spec.Type != "LoadBalancer" || (svc.Spec.LoadBalancerClass != nil && *svc.Spec.LoadBalancerClass != "") {
+		level.Debug(l).Log("event", "clearAssignment", "reason", "notLoadBalancer", "msg", "not a LoadBalancer or LoadBalancerClass set")
 		c.clearServiceState(key, svc)
 		// Early return, we explicitly do *not* want to reallocate
 		// an IP.
