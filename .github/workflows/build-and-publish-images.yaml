@@ -31,7 +31,7 @@ jobs:
           ./speaker
       - name: build frr-metrics binary
         run: >
-          CGO_ENABLED=0 GOOS=linux go build -o speaker/frr-metrcics
+          CGO_ENABLED=0 GOOS=linux go build -o speaker/frr-metrics
           -ldflags="-X 'go.universe.tf/metallb/internal/version.version=${{github.ref_name}}'
           -X 'go.universe.tf/metallb/internal/version.gitCommit=${{github.sha}}'"
           ./frr-metrics/exporter.go
