@@ -40,11 +40,20 @@ func (c *controller) convergeBalancer(l log.Logger, key string, svc *v1.Service)
 	// Not a LoadBalancer or has a loadbalancerClass set, early exit. It
 	// might have been a balancer in the past, so we still need to clear LB
 	// state.
-	if svc.Spec.Type != "LoadBalancer" || (svc.Spec.LoadBalancerClass != nil && *svc.Spec.LoadBalancerClass != "") {
-		level.Debug(l).Log("event", "clearAssignment", "reason", "notLoadBalancer", "msg", "not a LoadBalancer or LoadBalancerClass set")
+	if svc.Spec.Type != "LoadBalancer" {
+		level.Debug(l).Log("event", "clearAssignment", "reason", "notLoadBalancer", "msg", "not a LoadBalancer")
 		c.clearServiceState(key, svc)
 		// Early return, we explicitly do *not* want to reallocate
 		// an IP.
+		return true
+	}
+	if svc.Spec.LoadBalancerClass != nil && *svc.Spec.LoadBalancerClass != "" {
+		// This service has a loadBalancerClass set which we will not
+		// handle. We will remove all possible assigned IPs internally,
+		// but we will not overwrite the status as another controller
+		// could have set it already.
+		level.Debug(l).Log("event", "clearAssignment", "reason", "loadBalancerClassSet", "msg", "loadBalancer service has loadBalancerClass set")
+		c.ips.Unassign(key)
 		return true
 	}
 

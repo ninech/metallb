@@ -1,5 +1,3 @@
-// SPDX-License-Identifier:Apache-2.0
-
 package main
 
 import (
@@ -183,6 +181,18 @@ func TestControllerMutation(t *testing.T) {
 					LoadBalancerClass: ptr.To("test"),
 					ClusterIPs:        []string{"1.2.3.4"},
 				},
+			},
+		},
+
+		{
+			desc: "simple LoadBalancer with LoadBalancerClass and status set",
+			in: &v1.Service{
+				Spec: v1.ServiceSpec{
+					Type:              "LoadBalancer",
+					LoadBalancerClass: ptr.To("test"),
+					ClusterIPs:        []string{"1.2.3.4"},
+				},
+				Status: statusAssigned([]string{"5.6.7.8"}),
 			},
 		},
 
