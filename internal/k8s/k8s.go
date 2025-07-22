@@ -11,8 +11,10 @@ import (
 	"net"
 	"net/http"
 	"net/http/pprof"
+	"time"
 
 	"go.universe.tf/metallb/internal/config"
+	"golang.org/x/time/rate"
 
 	"github.com/go-kit/kit/log"
 	"github.com/go-kit/kit/log/level"
@@ -110,6 +112,7 @@ const slicesServiceIndexName = "ServiceName"
 //
 // The client uses processName to identify itself to the cluster
 // (e.g. when logging events).
+//
 //nolint:godot
 func New(cfg *Config) (*Client, error) {
 	var (
@@ -138,7 +141,12 @@ func New(cfg *Config) (*Client, error) {
 	broadcaster.StartRecordingToSink(&v1core.EventSinkImpl{Interface: v1core.New(clientset.CoreV1().RESTClient()).Events("")})
 	recorder := broadcaster.NewRecorder(scheme.Scheme, v1.EventSource{Component: cfg.ProcessName})
 
-	queue := workqueue.NewRateLimitingQueue(workqueue.DefaultControllerRateLimiter())
+	// failed services should be reconciled at least every minute
+	queue := workqueue.NewRateLimitingQueue(workqueue.NewMaxOfRateLimiter(
+		workqueue.NewItemExponentialFailureRateLimiter(5*time.Millisecond, 60*time.Second),
+		// 10 qps, 100 bucket size.  This is only for retry speed and its only the overall factor (not per item)
+		&workqueue.BucketRateLimiter{Limiter: rate.NewLimiter(rate.Limit(10), 100)},
+	))
 
 	c := &Client{
 		logger:         cfg.Logger,
