@@ -14,7 +14,6 @@ import (
 	"time"
 
 	"go.universe.tf/metallb/internal/config"
-	"golang.org/x/time/rate"
 
 	"github.com/go-kit/kit/log"
 	"github.com/go-kit/kit/log/level"
@@ -145,7 +144,7 @@ func New(cfg *Config) (*Client, error) {
 	queue := workqueue.NewRateLimitingQueue(workqueue.NewMaxOfRateLimiter(
 		workqueue.NewItemExponentialFailureRateLimiter(5*time.Millisecond, 60*time.Second),
 		// 10 qps, 100 bucket size.  This is only for retry speed and its only the overall factor (not per item)
-		&workqueue.BucketRateLimiter{Limiter: rate.NewLimiter(rate.Limit(10), 100)},
+		// &workqueue.BucketRateLimiter{Limiter: rate.NewLimiter(rate.Limit(10), 100)},
 	))
 
 	c := &Client{
