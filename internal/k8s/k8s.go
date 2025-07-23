@@ -14,7 +14,6 @@ import (
 	"time"
 
 	"go.universe.tf/metallb/internal/config"
-	"golang.org/x/time/rate"
 
 	"github.com/go-kit/kit/log"
 	"github.com/go-kit/kit/log/level"
@@ -142,11 +141,7 @@ func New(cfg *Config) (*Client, error) {
 	recorder := broadcaster.NewRecorder(scheme.Scheme, v1.EventSource{Component: cfg.ProcessName})
 
 	// failed services should be reconciled at least every minute
-	queue := workqueue.NewRateLimitingQueue(workqueue.NewMaxOfRateLimiter(
-		workqueue.NewItemExponentialFailureRateLimiter(5*time.Millisecond, 60*time.Second),
-		// 10 qps, 100 bucket size.  This is only for retry speed and its only the overall factor (not per item)
-		&workqueue.BucketRateLimiter{Limiter: rate.NewLimiter(rate.Limit(10), 100)},
-	))
+	queue := workqueue.NewRateLimitingQueue(workqueue.NewItemExponentialFailureRateLimiter(5*time.Millisecond, 60*time.Second))
 
 	c := &Client{
 		logger:         cfg.Logger,
