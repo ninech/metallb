@@ -144,10 +144,10 @@ func (c *controller) convergeBalancer(l log.Logger, key string, svc *v1.Service)
 		if err != nil {
 			level.Error(l).Log("op", "allocateIPs", "error", err, "msg", "IP allocation failed")
 			c.client.Errorf(svc, "AllocationFailed", "Failed to allocate IP for %q: %s", key, err)
-			// The outer controller loop will retry converging this
-			// service when another service gets deleted, so there's
-			// nothing to do here but wait to get called again later.
-			return true
+			// we weren't able to allocate an IP so far, but we
+			// will add this service to the rate limited queue from
+			// where it will be reconciled again
+			return false
 		}
 		level.Info(l).Log("event", "ipAllocated", "ip", lbIPs, "msg", "IP address assigned by controller")
 		c.client.Infof(svc, "IPAllocated", "Assigned IP %q", lbIPs)
